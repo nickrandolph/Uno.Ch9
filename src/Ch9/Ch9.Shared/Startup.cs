@@ -7,25 +7,25 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Ch9
 {
-	public class Startup
+	public static class Startup
 	{
-		public void Initialize(Ioc ioc)
+		//public void Initialize(Ioc ioc)
+		//{
+		//	//ioc.ConfigureServices(services =>
+		//	//{
+		//	//	InitializeHttpClient(services);
+		//	//	InitializeBusinessServices(services);
+		//	//});
+		//}
+
+		public static IServiceCollection InitializeBusinessServices(this IServiceCollection serviceProvider)
 		{
-			ioc.ConfigureServices(services =>
-			{
-				InitializeHttpClient(services);
-				InitializeBusinessServices(services);
-			});
+			return serviceProvider.AddSingleton<IShowService, ShowService>();
 		}
 
-		private void InitializeBusinessServices(IServiceCollection serviceProvider)
+		public static IServiceCollection InitializeHttpClient(this IServiceCollection serviceProvider)
 		{
-			serviceProvider.AddSingleton<IShowService, ShowService>();
-		}
-
-		private void InitializeHttpClient(IServiceCollection serviceProvider)
-		{
-			serviceProvider.AddTransient(s =>
+			return serviceProvider.AddTransient(s =>
 			{
 				var client = HttpUtility.CreateHttpClient();
 

@@ -55,11 +55,11 @@ namespace Ch9.ViewModels
 
         public ICommand ShareEpisode { get; }
 
-        private TaskNotifier<Show> _show;
-        public TaskNotifier<Show> Show
+		private TaskNotifier<Show> _show;
+        public Task<Show> Show
         {
             get => _show;
-            set => SetProperty(ref _show, value);
+            set => SetPropertyAndNotifyOnCompletion(ref _show, value);
         }
 
         private EpisodeViewModel[] _episodes;
@@ -100,7 +100,7 @@ namespace Ch9.ViewModels
                 return show;
             }
 
-            Show = new TaskNotifier<Show>(GetShow());
+            Show = GetShow();
         }
     }
 }

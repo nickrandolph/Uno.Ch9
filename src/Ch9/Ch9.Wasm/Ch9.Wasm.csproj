@@ -28,6 +28,8 @@
 		<NoWarn>NU1701</NoWarn>
 		<WasmHead>True</WasmHead>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<LangVersion>9.0</LangVersion>
+		<DefineConstants>$(DefineConstants);UNO_UWP_COMPATIBILITY</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -86,26 +88,33 @@
 
 	<ItemGroup>
 		<!-- Note that for WebAssembly version 1.1.1 of the console logger required -->
-		<PackageReference Include="Microsoft.AppCenter.Analytics" Version="3.2.2" />
-		<PackageReference Include="Microsoft.AppCenter.Crashes" Version="3.2.2" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.1.1" />
+		<PackageReference Include="Microsoft.AppCenter.Analytics" Version="4.3.0" />
+		<PackageReference Include="Microsoft.AppCenter.Crashes" Version="4.3.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Filter" Version="1.1.2" />
-		<PackageReference Include="System.ServiceModel.Syndication" Version="4.7.0" />
-		<PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.0.0-preview2" />
+		<PackageReference Include="System.ServiceModel.Syndication" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.0.2" />
+		<PackageReference Include="Uno.Extensions.Configuration" Version="1.0.0" />
+		<PackageReference Include="Uno.Extensions.Hosting" Version="1.0.0" />
+		<PackageReference Include="Uno.Extensions.Http" Version="1.0.0" />
+		<PackageReference Include="Uno.Extensions.Logging" Version="1.0.0" />
+		<PackageReference Include="Uno.Extensions.Logging.WebAssembly.Console" Version="1.1.0" />
+		<PackageReference Include="Uno.Extensions.Navigation" Version="1.0.0" />
     <PackageReference Include="Uno.Material" Version="1.0.0-dev.592" />
-    <PackageReference Include="Uno.UI" Version="3.5.0-dev.392" />
-    <PackageReference Include="Uno.UI.Lottie" Version="3.5.0-dev.392" />
-		<PackageReference Include="Uno.UI.WebAssembly" Version="3.5.0-dev.392" />
-		<PackageReference Include="Uno.UI.RemoteControl" Version="3.5.0-dev.392" Condition="'$(Configuration)'=='Debug'" />
-		<PackageReference Include="Uno.Wasm.Bootstrap" Version="2.0.0-dev.150" />
-		<PackageReference Include="Uno.Wasm.Bootstrap.DevServer" Version="2.0.0-dev.150" />
+    <PackageReference Include="Uno.UI" Version="3.8.13" />
+    <PackageReference Include="Uno.UI.Lottie" Version="3.8.13" />
+		<PackageReference Include="Uno.UI.WebAssembly" Version="3.8.13" />
+		<PackageReference Include="Uno.UI.RemoteControl" Version="3.8.13" Condition="'$(Configuration)'=='Debug'" />
+		<PackageReference Include="Uno.Wasm.Bootstrap" Version="2.1.0" />
+		<PackageReference Include="Uno.Wasm.Bootstrap.DevServer" Version="2.1.0" />
 		<PackageReference Include="Uno.WindowsStateTriggers" Version="1.1.1-uno.132" />
-		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="Microsoft.TypeScript.Compiler" Version="3.1.5">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.3.1">
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.3.5">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 		</PackageReference>

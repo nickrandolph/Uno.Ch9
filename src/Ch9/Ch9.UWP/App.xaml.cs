@@ -32,6 +32,10 @@ using Uno.Logging;
 #if !__WASM__ && !__MACOS__
 using Xamarin.Essentials;
 #endif
+using Microsoft.Extensions.Hosting;
+using Uno.Extensions.Hosting;
+using Uno.Extensions.Logging;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Ch9
 {
@@ -42,19 +46,70 @@ namespace Ch9
 	{
 		public static App Instance { get; private set; }
 
-		private readonly Startup _startup;
+		//private readonly Startup _startup;
 
 		private Shell _shell;
 		private bool _isActivityBackgroundCleared;
+
+		private IHost Host { get; }
 
 		public App()
 		{
 			Instance = this;
 
+			Host = UnoHost
+			   //-:cnd:noEmit
+#if __WASM__
+//+:cnd:noEmit
+                .CreateDefaultBuilderForWASM()
+//-:cnd:noEmit
+#else
+			   //+:cnd:noEmit
+			   .CreateDefaultBuilder()
+			   //-:cnd:noEmit
+#endif
+			   //+:cnd:noEmit
+
+			   //.UseEnvironment("Staging")
+			   //.UseAppSettings<App>()
+			   //.UseHostConfigurationForApp()
+			   //.UseConfigurationSectionInApp<CustomIntroduction>(nameof(CustomIntroduction))
+			   .UseUnoLogging(logBuilder =>
+			   {
+				   logBuilder
+						.SetMinimumLevel(LogLevel.Debug)
+						.XamlLogLevel(LogLevel.Information)
+						.XamlLayoutLogLevel(LogLevel.Information);
+			   }
+			   //-:cnd:noEmit
+#if __WASM__
+//+:cnd:noEmit
+                    , new global::Uno.Extensions.Logging.WebAssembly.WebAssemblyConsoleLoggerProvider()
+//-:cnd:noEmit
+#endif
+			   //+:cnd:noEmit
+			   )
+			   //.UseSerilog(true)
+			   //.UseLocalization()
+			   //.UseRouting<RouterConfiguration, LaunchMessage>(() => _frame)
+			   //.ConfigureServices(services =>
+			   //{
+			   // _ = services.AddNativeHandler();
+			   //})
+			   //.UseFirebaseHandler()
+			   .ConfigureServices(services =>
+			   {
+				   _ = services.InitializeBusinessServices()
+				   .InitializeHttpClient();
+			   })
+			   .Build()
+			   .EnableUnoLogging();
+			Ioc.Default.ConfigureServices(Host.Services);
+
 			// Uncomment this if you want to set a default theme.
 			// this.RequestedTheme = ApplicationTheme.Dark;
 
-			_startup = new Startup();
+			//_startup = new Startup();
 
 			ConfigureFilters(global::Uno.Extensions.LogExtensionPoint.AmbientLoggerFactory);
 
@@ -85,7 +140,7 @@ namespace Ch9
 			// just ensure that the window is active
 			if (_shell == null)
 			{
-				_startup.Initialize(Ioc.Default);
+				//_startup.Initialize(Ioc.Default);
 
 				ConfigureViewSize();
 				ConfigureStatusBar();
@@ -227,51 +282,51 @@ namespace Ch9
 
 		private void ConfigureFilters(ILoggerFactory factory)
 		{
-			factory
-				.WithFilter(new FilterLoggerSettings
-					{
-						{ "Uno", Microsoft.Extensions.Logging.LogLevel.Warning },
-						{ "Windows", Microsoft.Extensions.Logging.LogLevel.Warning },
+//			factory
+//				.WithFilter(new FilterLoggerSettings
+//					{
+//						{ "Uno", Microsoft.Extensions.Logging.LogLevel.Warning },
+//						{ "Windows", Microsoft.Extensions.Logging.LogLevel.Warning },
 
-						// Debug JS interop
-						// { "Uno.Foundation.WebAssemblyRuntime", LogLevel.Debug },
+//						// Debug JS interop
+//						// { "Uno.Foundation.WebAssemblyRuntime", LogLevel.Debug },
 
-						// Generic Xaml events
-						// { "Windows.UI.Xaml", LogLevel.Debug },
-						// { "Windows.UI.Xaml.VisualStateGroup", LogLevel.Debug },
-						// { "Windows.UI.Xaml.StateTriggerBase", LogLevel.Debug },
-						// { "Windows.UI.Xaml.UIElement", LogLevel.Debug },
+//						// Generic Xaml events
+//						// { "Windows.UI.Xaml", LogLevel.Debug },
+//						// { "Windows.UI.Xaml.VisualStateGroup", LogLevel.Debug },
+//						// { "Windows.UI.Xaml.StateTriggerBase", LogLevel.Debug },
+//						// { "Windows.UI.Xaml.UIElement", LogLevel.Debug },
 
-						// Layouter specific messages
-						// { "Windows.UI.Xaml.Controls", LogLevel.Debug },
-						// { "Windows.UI.Xaml.Controls.Layouter", LogLevel.Debug },
-						// { "Windows.UI.Xaml.Controls.Panel", LogLevel.Debug },
-						// { "Windows.Storage", LogLevel.Debug },
+//						// Layouter specific messages
+//						// { "Windows.UI.Xaml.Controls", LogLevel.Debug },
+//						// { "Windows.UI.Xaml.Controls.Layouter", LogLevel.Debug },
+//						// { "Windows.UI.Xaml.Controls.Panel", LogLevel.Debug },
+//						// { "Windows.Storage", LogLevel.Debug },
 
-						// Binding related messages
-						// { "Windows.UI.Xaml.Data", LogLevel.Debug },
+//						// Binding related messages
+//						// { "Windows.UI.Xaml.Data", LogLevel.Debug },
 
-						// DependencyObject memory references tracking
-						// { "ReferenceHolder", LogLevel.Debug },
+//						// DependencyObject memory references tracking
+//						// { "ReferenceHolder", LogLevel.Debug },
 
-						// ListView-related messages
-						// { "Windows.UI.Xaml.Controls.ListViewBase", LogLevel.Debug },
-						// { "Windows.UI.Xaml.Controls.ListView", LogLevel.Debug },
-						// { "Windows.UI.Xaml.Controls.GridView", LogLevel.Debug },
-						// { "Windows.UI.Xaml.Controls.VirtualizingPanelLayout", LogLevel.Debug },
-						// { "Windows.UI.Xaml.Controls.NativeListViewBase", LogLevel.Debug },
-						// { "Windows.UI.Xaml.Controls.ListViewBaseSource", LogLevel.Debug }, //iOS
-						// { "Windows.UI.Xaml.Controls.ListViewBaseInternalContainer", LogLevel.Debug }, //iOS
-						// { "Windows.UI.Xaml.Controls.NativeListViewBaseAdapter", LogLevel.Debug }, //Android
-						// { "Windows.UI.Xaml.Controls.BufferViewCache", LogLevel.Debug }, //Android
-						// { "Windows.UI.Xaml.Controls.VirtualizingPanelGenerator", LogLevel.Debug }, //WASM
-					}
-				)
-#if DEBUG
-				.AddConsole(Microsoft.Extensions.Logging.LogLevel.Debug);
-#else
-				.AddConsole(Microsoft.Extensions.Logging.LogLevel.Information);
-#endif
+//						// ListView-related messages
+//						// { "Windows.UI.Xaml.Controls.ListViewBase", LogLevel.Debug },
+//						// { "Windows.UI.Xaml.Controls.ListView", LogLevel.Debug },
+//						// { "Windows.UI.Xaml.Controls.GridView", LogLevel.Debug },
+//						// { "Windows.UI.Xaml.Controls.VirtualizingPanelLayout", LogLevel.Debug },
+//						// { "Windows.UI.Xaml.Controls.NativeListViewBase", LogLevel.Debug },
+//						// { "Windows.UI.Xaml.Controls.ListViewBaseSource", LogLevel.Debug }, //iOS
+//						// { "Windows.UI.Xaml.Controls.ListViewBaseInternalContainer", LogLevel.Debug }, //iOS
+//						// { "Windows.UI.Xaml.Controls.NativeListViewBaseAdapter", LogLevel.Debug }, //Android
+//						// { "Windows.UI.Xaml.Controls.BufferViewCache", LogLevel.Debug }, //Android
+//						// { "Windows.UI.Xaml.Controls.VirtualizingPanelGenerator", LogLevel.Debug }, //WASM
+//					}
+//				)
+//#if DEBUG
+//				.AddConsole(Microsoft.Extensions.Logging.LogLevel.Debug);
+//#else
+//				.AddConsole(Microsoft.Extensions.Logging.LogLevel.Information);
+//#endif
 		}
 #endregion
 

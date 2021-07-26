@@ -33,10 +33,10 @@ namespace Ch9.ViewModels
 		public ICommand DisplayShow { get; set; }
 
 		private TaskNotifier<IEnumerable<ShowItemViewModel>> _shows;
-		public TaskNotifier<IEnumerable<ShowItemViewModel>> Shows
+		public Task<IEnumerable<ShowItemViewModel>> Shows
 		{
 			get => _shows;
-			set => SetProperty(ref _shows, value);
+			set => SetPropertyAndNotifyOnCompletion(ref _shows, value);
 		}
 
 		private void LoadShowFeeds()
@@ -51,7 +51,7 @@ namespace Ch9.ViewModels
 					.ToArray();
 			}
 
-			Shows = new TaskNotifier<IEnumerable<ShowItemViewModel>>(GetShowFeeds());
+			Shows = GetShowFeeds();
 		}
 	}
 
