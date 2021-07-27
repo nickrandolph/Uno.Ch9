@@ -129,7 +129,7 @@ namespace Ch9
 
         private async Task<SyndicationFeed> GetRssFeed(string url)
         {
-			using (var reader = await HttpUtility.GetXmlReader(url))
+			using (var reader = await _httpClient.GetXmlReader(url))
             {
                return SyndicationFeed.Load(reader);
             }

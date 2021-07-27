@@ -6,6 +6,7 @@
 	<assembly fullname="Ch9.Wasm" />
 	
 	<assembly fullname="Microsoft.Extensions.Options" />
+	<assembly fullname="Microsoft.Extensions.Http" />
 	<assembly fullname="Microsoft.Extensions.Hosting" />
 	<assembly fullname="Microsoft.Extensions.Logging" />
 	<assembly fullname="Microsoft.Extensions.Logging.Configuration" />
@@ -16,4 +17,5 @@
 	<assembly fullname="System.Xml.Linq">
 		<type fullname="System.Xml.Linq.XElement" />
 	</assembly>
+	<assembly fullname="System.Text.Json"/>
 </linker>

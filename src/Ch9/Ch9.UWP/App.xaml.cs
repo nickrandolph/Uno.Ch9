@@ -41,6 +41,7 @@ using Uno.Extensions.Http;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 using System.Text;
+using Uno.Extensions.Configuration;
 
 namespace Ch9
 {
@@ -102,20 +103,32 @@ namespace Ch9
 			   // _ = services.AddNativeHandler();
 			   //})
 			   //.UseFirebaseHandler()
-			   .ConfigureHostConfiguration(config =>
-			   {
-				  // var disablereload = new Dictionary<string, string>
-						//{
-						//	{ typeof(IShowService).Name, JsonSerializer.Serialize( new  EndpointOptions() {Url="https://ch9-app.azurewebsites.net/"}) },
-						//};
-				  // config.AddInMemoryCollection(disablereload);
+			   //.ConfigureHostConfiguration(config =>
+			   //{
+				  //// var disablereload = new Dictionary<string, string>
+						////{
+						////	{ typeof(IShowService).Name, JsonSerializer.Serialize( new  EndpointOptions() {Url="https://ch9-app.azurewebsites.net/"}) },
+						////};
+				  //// config.AddInMemoryCollection(disablereload);
 
-				   config.AddJsonStream(new MemoryStream(Encoding.ASCII.GetBytes(JsonSerializer.Serialize(new Dictionary<string, EndpointOptions> { { typeof(IShowService).Name, new EndpointOptions() { Url = "https://ch9-app.azurewebsites.net/" } } }))));
-			   })
+				  // config.AddJsonStream(new MemoryStream(Encoding.ASCII.GetBytes(JsonSerializer.Serialize(new Dictionary<string, EndpointOptions> { { typeof(IShowService).Name, new EndpointOptions() { Url = "https://ch9-app.azurewebsites.net/" } } }))));
+			   //})
+			   .AddConfigurationSectionFromEntity(new EndpointOptions() {
+				   Url = "https://ch9-app.azurewebsites.net/",
+				   Features = new Dictionary<string, bool>
+				   {
+					   { nameof(EndpointOptions.UseNativeHandler), true }
+				   }
+			   }, typeof(IShowService).Name)
 			   .ConfigureServices((context, services) =>
 			   {
 				   _ = services
-				   .AddClient<IShowService, ShowService>(context);
+				   .AddNativeHandler(
+#if __WASM__
+				() => new Uno.UI.Wasm.WasmHttpHandler()
+#endif
+				)
+				   .AddClient<IShowService, ShowService>(context, typeof(IShowService).Name);
 				   //.InitializeHttpClient();
 			   })
 			   .Build()
