@@ -21,8 +21,8 @@
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
     <AndroidUseIntermediateDesignerFile>True</AndroidUseIntermediateDesignerFile>
     <ResourcesDirectory>..\Ch9.Shared\Strings</ResourcesDirectory>
-		<LangVersion>9.0</LangVersion>
-		<DefineConstants>$(DefineConstants);UNO_UWP_COMPATIBILITY</DefineConstants>
+    <LangVersion>9.0</LangVersion>
+    <DefineConstants>$(DefineConstants);UNO_UWP_COMPATIBILITY</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

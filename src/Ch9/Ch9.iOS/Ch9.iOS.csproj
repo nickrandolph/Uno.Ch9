@@ -13,9 +13,9 @@
     </NuGetPackageImportStamp>
     <ResourcesDirectory>..\Ch9.Shared\Strings</ResourcesDirectory>
     <ProvisioningType>automatic</ProvisioningType>
-		<LangVersion>9.0</LangVersion>
-		<DefineConstants>$(DefineConstants);UNO_UWP_COMPATIBILITY</DefineConstants>
-	</PropertyGroup>
+    <LangVersion>9.0</LangVersion>
+    <DefineConstants>$(DefineConstants);UNO_UWP_COMPATIBILITY</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>portable</DebugType>

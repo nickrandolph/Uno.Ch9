@@ -11,9 +11,9 @@
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <TargetFrameworkIdentifier>Xamarin.Mac</TargetFrameworkIdentifier>
     <MonoMacResourcePrefix>Resources</MonoMacResourcePrefix>
-		<LangVersion>9.0</LangVersion>
-		<DefineConstants>$(DefineConstants);UNO_UWP_COMPATIBILITY</DefineConstants>
-	</PropertyGroup>
+    <LangVersion>9.0</LangVersion>
+    <DefineConstants>$(DefineConstants);UNO_UWP_COMPATIBILITY</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>

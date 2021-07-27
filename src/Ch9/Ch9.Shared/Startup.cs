@@ -18,21 +18,21 @@ namespace Ch9
 		//	//});
 		//}
 
-		public static IServiceCollection InitializeBusinessServices(this IServiceCollection serviceProvider)
-		{
-			return serviceProvider.AddSingleton<IShowService, ShowService>();
-		}
+		//public static IServiceCollection InitializeBusinessServices(this IServiceCollection serviceProvider)
+		//{
+		//	return serviceProvider.AddSingleton<IShowService, ShowService>();
+		//}
 
-		public static IServiceCollection InitializeHttpClient(this IServiceCollection serviceProvider)
-		{
-			return serviceProvider.AddTransient(s =>
-			{
-				var client = HttpUtility.CreateHttpClient();
+		//public static IServiceCollection InitializeHttpClient(this IServiceCollection serviceProvider)
+		//{
+		//	return serviceProvider.AddTransient(s =>
+		//	{
+		//		var client = HttpUtility.CreateHttpClient();
 
-				client.BaseAddress = new Uri("https://ch9-app.azurewebsites.net/");
+		//		client.BaseAddress = new Uri("https://ch9-app.azurewebsites.net/");
 
-				return client;
-			});
-		}
+		//		return client;
+		//	});
+		//}
 	}
 }

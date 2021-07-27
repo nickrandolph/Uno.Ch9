@@ -36,6 +36,11 @@ using Microsoft.Extensions.Hosting;
 using Uno.Extensions.Hosting;
 using Uno.Extensions.Logging;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+using Microsoft.Extensions.DependencyInjection;
+using Uno.Extensions.Http;
+using Microsoft.Extensions.Configuration;
+using System.Text.Json;
+using System.Text;
 
 namespace Ch9
 {
@@ -97,10 +102,21 @@ namespace Ch9
 			   // _ = services.AddNativeHandler();
 			   //})
 			   //.UseFirebaseHandler()
-			   .ConfigureServices(services =>
+			   .ConfigureHostConfiguration(config =>
 			   {
-				   _ = services.InitializeBusinessServices()
-				   .InitializeHttpClient();
+				  // var disablereload = new Dictionary<string, string>
+						//{
+						//	{ typeof(IShowService).Name, JsonSerializer.Serialize( new  EndpointOptions() {Url="https://ch9-app.azurewebsites.net/"}) },
+						//};
+				  // config.AddInMemoryCollection(disablereload);
+
+				   config.AddJsonStream(new MemoryStream(Encoding.ASCII.GetBytes(JsonSerializer.Serialize(new Dictionary<string, EndpointOptions> { { typeof(IShowService).Name, new EndpointOptions() { Url = "https://ch9-app.azurewebsites.net/" } } }))));
+			   })
+			   .ConfigureServices((context, services) =>
+			   {
+				   _ = services
+				   .AddClient<IShowService, ShowService>(context);
+				   //.InitializeHttpClient();
 			   })
 			   .Build()
 			   .EnableUnoLogging();
