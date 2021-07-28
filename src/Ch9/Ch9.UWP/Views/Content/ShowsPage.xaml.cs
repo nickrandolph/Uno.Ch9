@@ -22,9 +22,25 @@ namespace Ch9.Views
 		{
 			this.InitializeComponent();
 
-			DataContext = new ShowsPageViewModel();
+			//DataContext = new ShowsPageViewModel();
+			DataContextChanged += ShowsPage_DataContextChanged;
+		}
+
+		private void ShowsPage_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
+		{
+			Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
+			{
+					ViewModel?.LoadShowFeeds();
+			});
 		}
 
 		public ShowsPageViewModel ViewModel => DataContext as ShowsPageViewModel;
+
+		protected override void OnNavigatedTo(NavigationEventArgs e)
+		{
+			base.OnNavigatedTo(e);
+
+			ViewModel?.LoadShowFeeds();
+		}
 	}
 }

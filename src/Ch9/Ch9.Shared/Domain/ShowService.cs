@@ -64,7 +64,8 @@ namespace Ch9
 	        {
 				var response = await _httpClient.GetStringAsync("api/rssfeeds");
 
-				return JsonConvert.DeserializeObject<SourceFeed[]>(response);
+				var feedItems = JsonConvert.DeserializeObject<SourceFeed[]>(response);
+				return feedItems;
 			}
 	        catch (Exception e)
 	        {

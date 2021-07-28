@@ -42,6 +42,12 @@ using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 using System.Text;
 using Uno.Extensions.Configuration;
+using Uno.Extensions.Navigation;
+using Ch9.Views;
+using Uno.Extensions.Navigation.Messages;
+using CommunityToolkit.Mvvm.Messaging;
+using static Ch9.Shell;
+using System.Threading.Tasks;
 
 namespace Ch9
 {
@@ -52,7 +58,6 @@ namespace Ch9
 	{
 		public static App Instance { get; private set; }
 
-		//private readonly Startup _startup;
 
 		private Shell _shell;
 		private bool _isActivityBackgroundCleared;
@@ -64,21 +69,11 @@ namespace Ch9
 			Instance = this;
 
 			Host = UnoHost
-			   //-:cnd:noEmit
 #if __WASM__
-//+:cnd:noEmit
                 .CreateDefaultBuilderForWASM()
-//-:cnd:noEmit
 #else
-			   //+:cnd:noEmit
 			   .CreateDefaultBuilder()
-			   //-:cnd:noEmit
 #endif
-			   //+:cnd:noEmit
-
-			   //.UseEnvironment("Staging")
-			   //.UseAppSettings<App>()
-			   //.UseHostConfigurationForApp()
 			   //.UseConfigurationSectionInApp<CustomIntroduction>(nameof(CustomIntroduction))
 			   .UseUnoLogging(logBuilder =>
 			   {
@@ -87,33 +82,21 @@ namespace Ch9
 						.XamlLogLevel(LogLevel.Information)
 						.XamlLayoutLogLevel(LogLevel.Information);
 			   }
-			   //-:cnd:noEmit
 #if __WASM__
-//+:cnd:noEmit
                     , new global::Uno.Extensions.Logging.WebAssembly.WebAssemblyConsoleLoggerProvider()
-//-:cnd:noEmit
 #endif
-			   //+:cnd:noEmit
 			   )
 			   //.UseSerilog(true)
 			   //.UseLocalization()
-			   //.UseRouting<RouterConfiguration, LaunchMessage>(() => _frame)
-			   //.ConfigureServices(services =>
-			   //{
-			   // _ = services.AddNativeHandler();
-			   //})
-			   //.UseFirebaseHandler()
-			   //.ConfigureHostConfiguration(config =>
-			   //{
-				  //// var disablereload = new Dictionary<string, string>
-						////{
-						////	{ typeof(IShowService).Name, JsonSerializer.Serialize( new  EndpointOptions() {Url="https://ch9-app.azurewebsites.net/"}) },
-						////};
-				  //// config.AddInMemoryCollection(disablereload);
-
-				  // config.AddJsonStream(new MemoryStream(Encoding.ASCII.GetBytes(JsonSerializer.Serialize(new Dictionary<string, EndpointOptions> { { typeof(IShowService).Name, new EndpointOptions() { Url = "https://ch9-app.azurewebsites.net/" } } }))));
-			   //})
-			   .AddConfigurationSectionFromEntity(new EndpointOptions() {
+			   .UseRouting<RouterConfiguration, LaunchMessage>(() => _shell.ActiveFrame)
+			   .ConfigureServices(services =>
+			   {
+				   services
+					.AddSingleton<ITabManager>(sp => _shell)
+					.AddSingleton<IRouter, TabRouter>(); // Override the default Router
+			   }) 
+			   .AddConfigurationSectionFromEntity(new EndpointOptions()
+			   {
 				   Url = "https://ch9-app.azurewebsites.net/",
 				   Features = new Dictionary<string, bool>
 				   {
@@ -129,7 +112,6 @@ namespace Ch9
 #endif
 				)
 				   .AddClient<IShowService, ShowService>(context, typeof(IShowService).Name);
-				   //.InitializeHttpClient();
 			   })
 			   .Build()
 			   .EnableUnoLogging();
@@ -137,8 +119,6 @@ namespace Ch9
 
 			// Uncomment this if you want to set a default theme.
 			// this.RequestedTheme = ApplicationTheme.Dark;
-
-			//_startup = new Startup();
 
 			ConfigureFilters(global::Uno.Extensions.LogExtensionPoint.AmbientLoggerFactory);
 
@@ -188,9 +168,15 @@ namespace Ch9
 				// Ensure the current window is active
 				Windows.UI.Xaml.Window.Current.Activate();
 			}
+
+			_ = Task.Run(() =>
+			{
+				//Startup.Start();
+				Host.Run();
+			});
 		}
 
-#region Application configuration
+		#region Application configuration
 		private void ConfigureSuspension()
 		{
 			this.Suspending += OnSuspending;
@@ -215,22 +201,22 @@ namespace Ch9
 		private void ConfigureEscapeKey()
 		{
 #if WINDOWS_UWP
-            Window.Current.CoreWindow.CharacterReceived += CoreWindowCharacterReceived;
+			Window.Current.CoreWindow.CharacterReceived += CoreWindowCharacterReceived;
 
-            void CoreWindowCharacterReceived(Windows.UI.Core.CoreWindow sender, Windows.UI.Core.CharacterReceivedEventArgs args)
-            {
-                if (args.KeyCode == 27) // Escape key
-                {
-                    if (_shell.TryGetActiveViewModel<ShowPageViewModel>(out var showPage) && showPage.Show.IsVideoFullWindow)
-                    {
-                        showPage.Show.IsVideoFullWindow = false;
-                    }
-                    else if (_shell.TryGetActiveViewModel<RecentEpisodesPageViewModel>(out var recentEpisodesPage) && recentEpisodesPage.Show.IsVideoFullWindow)
-                    {
-                        recentEpisodesPage.Show.IsVideoFullWindow = false;
-                    }
-                }
-            }
+			void CoreWindowCharacterReceived(Windows.UI.Core.CoreWindow sender, Windows.UI.Core.CharacterReceivedEventArgs args)
+			{
+				if (args.KeyCode == 27) // Escape key
+				{
+					if (_shell.TryGetActiveViewModel<ShowPageViewModel>(out var showPage) && showPage.Show.IsVideoFullWindow)
+					{
+						showPage.Show.IsVideoFullWindow = false;
+					}
+					else if (_shell.TryGetActiveViewModel<RecentEpisodesPageViewModel>(out var recentEpisodesPage) && recentEpisodesPage.Show.IsVideoFullWindow)
+					{
+						recentEpisodesPage.Show.IsVideoFullWindow = false;
+					}
+				}
+			}
 #endif
 		}
 
@@ -311,53 +297,53 @@ namespace Ch9
 
 		private void ConfigureFilters(ILoggerFactory factory)
 		{
-//			factory
-//				.WithFilter(new FilterLoggerSettings
-//					{
-//						{ "Uno", Microsoft.Extensions.Logging.LogLevel.Warning },
-//						{ "Windows", Microsoft.Extensions.Logging.LogLevel.Warning },
+			//			factory
+			//				.WithFilter(new FilterLoggerSettings
+			//					{
+			//						{ "Uno", Microsoft.Extensions.Logging.LogLevel.Warning },
+			//						{ "Windows", Microsoft.Extensions.Logging.LogLevel.Warning },
 
-//						// Debug JS interop
-//						// { "Uno.Foundation.WebAssemblyRuntime", LogLevel.Debug },
+			//						// Debug JS interop
+			//						// { "Uno.Foundation.WebAssemblyRuntime", LogLevel.Debug },
 
-//						// Generic Xaml events
-//						// { "Windows.UI.Xaml", LogLevel.Debug },
-//						// { "Windows.UI.Xaml.VisualStateGroup", LogLevel.Debug },
-//						// { "Windows.UI.Xaml.StateTriggerBase", LogLevel.Debug },
-//						// { "Windows.UI.Xaml.UIElement", LogLevel.Debug },
+			//						// Generic Xaml events
+			//						// { "Windows.UI.Xaml", LogLevel.Debug },
+			//						// { "Windows.UI.Xaml.VisualStateGroup", LogLevel.Debug },
+			//						// { "Windows.UI.Xaml.StateTriggerBase", LogLevel.Debug },
+			//						// { "Windows.UI.Xaml.UIElement", LogLevel.Debug },
 
-//						// Layouter specific messages
-//						// { "Windows.UI.Xaml.Controls", LogLevel.Debug },
-//						// { "Windows.UI.Xaml.Controls.Layouter", LogLevel.Debug },
-//						// { "Windows.UI.Xaml.Controls.Panel", LogLevel.Debug },
-//						// { "Windows.Storage", LogLevel.Debug },
+			//						// Layouter specific messages
+			//						// { "Windows.UI.Xaml.Controls", LogLevel.Debug },
+			//						// { "Windows.UI.Xaml.Controls.Layouter", LogLevel.Debug },
+			//						// { "Windows.UI.Xaml.Controls.Panel", LogLevel.Debug },
+			//						// { "Windows.Storage", LogLevel.Debug },
 
-//						// Binding related messages
-//						// { "Windows.UI.Xaml.Data", LogLevel.Debug },
+			//						// Binding related messages
+			//						// { "Windows.UI.Xaml.Data", LogLevel.Debug },
 
-//						// DependencyObject memory references tracking
-//						// { "ReferenceHolder", LogLevel.Debug },
+			//						// DependencyObject memory references tracking
+			//						// { "ReferenceHolder", LogLevel.Debug },
 
-//						// ListView-related messages
-//						// { "Windows.UI.Xaml.Controls.ListViewBase", LogLevel.Debug },
-//						// { "Windows.UI.Xaml.Controls.ListView", LogLevel.Debug },
-//						// { "Windows.UI.Xaml.Controls.GridView", LogLevel.Debug },
-//						// { "Windows.UI.Xaml.Controls.VirtualizingPanelLayout", LogLevel.Debug },
-//						// { "Windows.UI.Xaml.Controls.NativeListViewBase", LogLevel.Debug },
-//						// { "Windows.UI.Xaml.Controls.ListViewBaseSource", LogLevel.Debug }, //iOS
-//						// { "Windows.UI.Xaml.Controls.ListViewBaseInternalContainer", LogLevel.Debug }, //iOS
-//						// { "Windows.UI.Xaml.Controls.NativeListViewBaseAdapter", LogLevel.Debug }, //Android
-//						// { "Windows.UI.Xaml.Controls.BufferViewCache", LogLevel.Debug }, //Android
-//						// { "Windows.UI.Xaml.Controls.VirtualizingPanelGenerator", LogLevel.Debug }, //WASM
-//					}
-//				)
-//#if DEBUG
-//				.AddConsole(Microsoft.Extensions.Logging.LogLevel.Debug);
-//#else
-//				.AddConsole(Microsoft.Extensions.Logging.LogLevel.Information);
-//#endif
+			//						// ListView-related messages
+			//						// { "Windows.UI.Xaml.Controls.ListViewBase", LogLevel.Debug },
+			//						// { "Windows.UI.Xaml.Controls.ListView", LogLevel.Debug },
+			//						// { "Windows.UI.Xaml.Controls.GridView", LogLevel.Debug },
+			//						// { "Windows.UI.Xaml.Controls.VirtualizingPanelLayout", LogLevel.Debug },
+			//						// { "Windows.UI.Xaml.Controls.NativeListViewBase", LogLevel.Debug },
+			//						// { "Windows.UI.Xaml.Controls.ListViewBaseSource", LogLevel.Debug }, //iOS
+			//						// { "Windows.UI.Xaml.Controls.ListViewBaseInternalContainer", LogLevel.Debug }, //iOS
+			//						// { "Windows.UI.Xaml.Controls.NativeListViewBaseAdapter", LogLevel.Debug }, //Android
+			//						// { "Windows.UI.Xaml.Controls.BufferViewCache", LogLevel.Debug }, //Android
+			//						// { "Windows.UI.Xaml.Controls.VirtualizingPanelGenerator", LogLevel.Debug }, //WASM
+			//					}
+			//				)
+			//#if DEBUG
+			//				.AddConsole(Microsoft.Extensions.Logging.LogLevel.Debug);
+			//#else
+			//				.AddConsole(Microsoft.Extensions.Logging.LogLevel.Information);
+			//#endif
 		}
-#endregion
+		#endregion
 
 		public void OnFullscreenChanged(bool isFullscreen)
 		{
@@ -399,5 +385,135 @@ namespace Ch9
 				viewModel.IsVideoFullWindow = isLandscape;
 			}
 		}
+	}
+
+
+
+	/// <summary>
+	/// This class is used for navigation configuration.
+	/// - Configures the navigator.
+	/// </summary>
+	public class RouterConfiguration : IRouteDefinitions
+	{
+		public IReadOnlyDictionary<string, (Type, Type)> Routes { get; } = new Dictionary<string, (Type, Type)>()
+						.RegisterPage<AboutPageViewModel, AboutPage>()
+						.RegisterPage<EpisodeViewModel,EpisodeContent >()
+			.RegisterPage<RecentEpisodesPageViewModel,RecentEpisodesPage>()
+			.RegisterPage<ShowPageViewModel,ShowPage>()
+			.RegisterPage<ShowsPageViewModel,ShowsPage>("");
+
+	}
+
+
+	//public class RouterRedirection : IRouteRedirection
+	//{
+	//	private IServiceProvider Services { get; }
+	//	public RouterRedirection(IServiceProvider services)
+	//	{
+	//		Services = services;
+	//		Redirection =
+	//			(stack, route, args) => {
+	//				if (route != "" && route != "/") return route;
+	//				var onboarding = Services.GetService<IWritableOptions<ApplicationSettings>>();
+	//				if (!(onboarding?.Value.IsOnboardingCompleted ?? false))
+	//				{
+	//					return typeof(OnboardingPageViewModel).AsRoute();
+	//				}
+	//				else
+	//				{
+	//					return typeof(WelcomePageViewModel).AsRoute();
+	//				}
+	//			};
+	//	}
+
+
+	//	public Func<
+	//			string[],                       // navigation stack
+	//			string,                         // new path
+	//			IDictionary<string, object>,    // args
+	//			string                          // relative path
+	//			> Redirection
+	//	{ get; }
+
+
+	//}
+
+	public interface ITabManager
+	{
+		event EventHandler TabsBuilt;
+		event EventHandler ActiveTabChanged;
+	}
+
+	public class TabRouter : Router
+	{
+		public const string TabTypeRouteParameter = "TabType";
+		public const string ShowRouteParameter = "Show";
+		private Shell _shell;
+		public TabRouter(
+			ITabManager tabManager,
+		   ILogger<Router> logger,
+		   INavigator navigator,
+		   IMessenger messenger,
+		   IRouteDefinitions routeDefinitions,
+		   IServiceProvider services,
+		   IRouteRedirection redirection = default
+		   ) : base(logger, navigator, messenger, routeDefinitions, services, redirection)
+		{
+			tabManager.TabsBuilt += TabBuilder_TabsBuilt;
+			tabManager.ActiveTabChanged += TabManager_ActiveTabChanged;
+
+			_shell = tabManager as Shell;
+			foreach (var tab in _shell.Tabs)
+			{
+				TabNavigationStack[tab.Key] = new Stack<string>();
+				TabNavigationViewModelInstances[tab.Key] = new Stack<object>();
+			}
+		}
+
+		private void TabManager_ActiveTabChanged(object sender, EventArgs e)
+		{
+			NavigationStack = TabNavigationStack[_shell.ActiveTabType];
+			NavigationViewModelInstances = TabNavigationViewModelInstances[_shell.ActiveTabType];
+		}
+
+		private IDictionary<TabType, Stack<string>> TabNavigationStack { get; } = new Dictionary<TabType, Stack<string>>();
+
+		private IDictionary<TabType, Stack<object>> TabNavigationViewModelInstances { get; } = new Dictionary<TabType, Stack<object>>();
+
+		private void TabBuilder_TabsBuilt(object sender, EventArgs e)
+		{
+			_shell = sender as Shell;
+			foreach (var tab in _shell.Tabs)
+			{
+				TabNavigationStack[tab.Key] = new Stack<string>();
+				TabNavigationViewModelInstances[tab.Key] = new Stack<object>();
+			}
+		}
+
+		protected override async Task<RoutingMessage> Preprocess(RoutingMessage message)
+		{
+			if(message is LaunchMessage)
+			{
+				message = message with { Args = new Dictionary<string, object> { { TabTypeRouteParameter, TabType.Shows } } };
+			}
+
+			if(message.Args.TryGetValue(TabTypeRouteParameter,out var tabTypeArg))
+			{
+				var tabType = (TabType)tabTypeArg;
+
+				var taskComplete = new TaskCompletionSource<bool>();
+				_ = _shell.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
+				{
+					_shell.UpdateActiveTab(tabType);
+					taskComplete.SetResult(true);	
+				});
+
+				await taskComplete.Task;
+			}
+
+			return await base.Preprocess(message);
+		}
+
+
 	}
 }

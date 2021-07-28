@@ -25,19 +25,19 @@ namespace Ch9.Views
 		{
 			this.InitializeComponent();
 
-			DataContext = new ShowPageViewModel();
+			//DataContext = new ShowPageViewModel();
 
 			EpisodeList.RegisterPropertyChangedCallback(ItemsControl.ItemsSourceProperty, OnItemsSourceChanged);
 		}
 
 		public ShowPageViewModel ViewModel => DataContext as ShowPageViewModel;
 
-		protected override void OnNavigatedTo(NavigationEventArgs e)
-		{
-			base.OnNavigatedTo(e);
+		//protected override void OnNavigatedTo(NavigationEventArgs e)
+		//{
+		//	base.OnNavigatedTo(e);
 
-			ViewModel.OnNavigatedTo(e.Parameter as SourceFeed);
-		}
+		//	ViewModel.OnNavigatedTo(e.Parameter as SourceFeed);
+		//}
 
 		private void OnItemsSourceChanged(DependencyObject sender, DependencyProperty dp)
 		{

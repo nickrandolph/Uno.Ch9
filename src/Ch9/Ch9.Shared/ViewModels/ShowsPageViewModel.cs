@@ -10,22 +10,32 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
+using Uno.Extensions.Navigation;
+using Uno.Extensions.Navigation.Messages;
+using static Ch9.Shell;
 
 namespace Ch9.ViewModels
 {
 	[Windows.UI.Xaml.Data.Bindable]
 	public class ShowsPageViewModel : ObservableObject
 	{
-		public ShowsPageViewModel()
+		private IShowService _showService;
+		public ShowsPageViewModel(IShowService showService, IRouteMessenger messenger)
 		{
+			_showService = showService;
 			DisplayShow = new RelayCommand<SourceFeed>(showFeed =>
 			{
-				Shell.Instance.NavigateTo(typeof(ShowPage), showFeed);
+				messenger.Send(new RoutingMessage(this, typeof(ShowPageViewModel).AsRoute(),
+					new Dictionary<string, object> {
+						{ TabRouter.TabTypeRouteParameter, TabType.Shows },
+						{TabRouter.ShowRouteParameter, showFeed }
+					}));
+				//Shell.Instance.NavigateTo(typeof(ShowPage), showFeed);
 			});
 
 			ReloadShowsList = new RelayCommand(LoadShowFeeds);
 
-			LoadShowFeeds();
+			//LoadShowFeeds();
 		}
 
 		public ICommand ReloadShowsList { get; }
@@ -36,19 +46,34 @@ namespace Ch9.ViewModels
 		public Task<IEnumerable<ShowItemViewModel>> Shows
 		{
 			get => _shows;
-			set => SetPropertyAndNotifyOnCompletion(ref _shows, value);
+			set
+			{
+				SetPropertyAndNotifyOnCompletion(ref _shows, value, task =>
+				{
+					OnPropertyChanged(nameof(ShowsResult));
+				});
+			}
 		}
 
-		private void LoadShowFeeds()
+		public IEnumerable<ShowItemViewModel> ShowsResult =>
+	((Task)_shows)?.Status == TaskStatus.RanToCompletion
+	? ((Task<IEnumerable<ShowItemViewModel>>)_shows).Result
+	: null;
+
+		public void LoadShowFeeds()
 		{
+			if (Shows != null) { return; }
 			async Task<IEnumerable<ShowItemViewModel>> GetShowFeeds()
 			{
-				var showFeeds = await Task.Run(() => Ioc.Default.GetService<IShowService>().GetShowFeeds());
+				return await Task.Run(async () =>
+				{
+					var showFeeds = await _showService.GetShowFeeds();
+					return showFeeds
+						.OrderBy(s => s.Name)
+						.Select(s => new ShowItemViewModel(this, s))
+						.ToArray();
+				});
 
-				return showFeeds
-					.OrderBy(s => s.Name)
-					.Select(s => new ShowItemViewModel(this, s))
-					.ToArray();
 			}
 
 			Shows = GetShowFeeds();

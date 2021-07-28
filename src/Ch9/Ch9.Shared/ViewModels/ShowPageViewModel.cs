@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Ch9.Domain;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
+using Uno.Extensions.Navigation;
 
 namespace Ch9.ViewModels
 {
 	[Windows.UI.Xaml.Data.Bindable]
-	public class ShowPageViewModel : ObservableObject
+	public class ShowPageViewModel : ObservableObject, IInitialise
     {
         public SourceFeed SourceFeed { get; set; }
 
@@ -25,15 +27,15 @@ namespace Ch9.ViewModels
             set => SetProperty(ref _isNarrowAndSelected, value);
         }
 
-        public void OnNavigatedTo(SourceFeed sourceFeed)
-        {
-            if (Show == null)
-            {
-                SourceFeed = sourceFeed;
+        //public void OnNavigatedTo(SourceFeed sourceFeed)
+        //{
+        //    if (Show == null)
+        //    {
+        //        SourceFeed = sourceFeed;
 
-                Show = new ShowViewModel(SourceFeed);
-            }
-        }
+        //        Show = new ShowViewModel(SourceFeed);
+        //    }
+        //}
 
 		public bool TryHandleBackRequested()
 		{
@@ -52,6 +54,19 @@ namespace Ch9.ViewModels
 			}
 
 			return false;
+		}
+
+		public Task Initialize(IDictionary<string, object> args)
+		{
+			var sourceFeed = args[TabRouter.ShowRouteParameter] as SourceFeed;
+			if (Show == null)
+			{
+				SourceFeed = sourceFeed;
+
+				Show = new ShowViewModel(SourceFeed);
+			}
+
+			return Task.CompletedTask;
 		}
 	}
 }

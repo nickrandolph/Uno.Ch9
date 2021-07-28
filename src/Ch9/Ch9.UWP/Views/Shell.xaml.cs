@@ -20,10 +20,11 @@ using Windows.UI.Xaml.Navigation;
 
 namespace Ch9
 {
-	public sealed partial class Shell : UserControl
+	public sealed partial class Shell : UserControl, ITabManager
 	{
-		private enum TabType
+		public enum TabType
 		{
+			None,
 			Recent,
 			Shows,
 			About
@@ -37,9 +38,12 @@ namespace Ch9
 			{ TabType.Shows, typeof(ShowsPage) },
 			{ TabType.About, typeof(AboutPage) },
 		};
+		public IReadOnlyDictionary<TabType, Type> Tabs => _tabs;
 
 		private NavigationViewItem _activeTab;
+		public TabType ActiveTabType => (_activeTab is not null) ? (TabType)_activeTab.Tag : default;
 		private Frame _activeFrame;
+		public Frame ActiveFrame => _activeFrame;
 
 		public Shell()
 		{
@@ -59,6 +63,9 @@ namespace Ch9
 		public NavigationView NavigationView => this.RootNavigationView;
 
 		public EventHandler<Frame> Navigated;
+
+		public event EventHandler TabsBuilt;
+		public event EventHandler ActiveTabChanged;
 
 		public void NavigateTo(string tabKey, Type pageType = null, object parameter = null)
 		{
@@ -121,9 +128,11 @@ namespace Ch9
 				NavigationView.ItemInvoked += OnNavigationViewItemInvoked;
 				NavigationView.BackRequested += OnNavigationViewBackRequested;
 
-				var initialSelection = (NavigationViewItem)NavigationView.MenuItems.First();
-				NavigateTo(initialSelection);
+				//var initialSelection = (NavigationViewItem)NavigationView.MenuItems.First();
+				//NavigateTo(initialSelection);
 			}
+
+			TabsBuilt?.Invoke(this, EventArgs.Empty);
 		}
 
 		private NavigationViewItem ConstructNavigationViewItem(KeyValuePair<TabType, Type> tab)
@@ -216,6 +225,7 @@ namespace Ch9
 
 				_activeTab = item;
 				_activeFrame = frame;
+				ActiveTabChanged?.Invoke(this, EventArgs.Empty);
 			}
 
 			UpdateBackButtonVisibility();
@@ -317,6 +327,39 @@ namespace Ch9
 					content.DataContext = null;
 				});
 			}
+		}
+
+		internal void UpdateActiveTab(TabType tabType)
+		{
+			if (!_tabs.TryGetValue(tabType, out var rootPageType))
+			{
+				// This tab doesn't exist.
+				throw new InvalidOperationException($"The tab '{tabType}' is not registered.");
+			}
+
+			// Create the frame for the specified tab if it doesn't exist.
+			if (!_frames.TryGetValue(tabType, out var frame))
+			{
+				frame = new Frame();
+				this.RootContent.Children.Add(frame);
+				_frames.Add(tabType, frame);
+			}
+
+			// If we're staying within the same tab, we either go back to the root or navigate forward.
+			if (ActiveTabType != tabType)
+			{
+				var item = NavigationView
+				.MenuItems
+				.Select(s => s as NavigationViewItem)
+				.Single(s => s.Tag.ToString() == tabType.ToString());
+
+				NavigationView.SelectedItem = item;
+
+				_activeTab = item;
+				_activeFrame = frame;
+				ActiveTabChanged?.Invoke(this, EventArgs.Empty);
+			}
+
 		}
 	}
 }

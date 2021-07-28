@@ -179,12 +179,12 @@
 
 		<!-- Show details -->
 		<Grid DataContext="{Binding Show}"
-			  Visibility="{Binding Show.IsSuccess, Converter={StaticResource TrueToVisible}, FallbackValue=Visible}"
+			  Visibility="{Binding Show, Converter={StaticResource FromTaskStatusToVisibilityConverter},ConverterParameter=RanToCompletion,  FallbackValue=Collapsed}"
 			  Grid.Row="1"
 			  Grid.Column="0"
 			  Grid.ColumnSpan="2">
 			<ContentControl x:Name="ShowDetails"
-							Content="{Binding Show.Result}"
+							Content="{Binding ShowResult}"
 							ContentTemplate="{StaticResource ShowDetailsTemplate}"
 							HorizontalContentAlignment="Stretch"
 							Visibility="Collapsed" />
@@ -192,7 +192,7 @@
 
 		<!-- Episodes list -->
 		<Grid DataContext="{Binding Show}"
-			  Visibility="{Binding Show.IsSuccess, Converter={StaticResource TrueToVisible}, FallbackValue=Visible}"
+			  Visibility="{Binding Show, Converter={StaticResource FromTaskStatusToVisibilityConverter},ConverterParameter=RanToCompletion,  FallbackValue=Collapsed}"
 			  Grid.Row="2"
 			  Grid.Column="0">
 
@@ -200,7 +200,7 @@
 			<ListView x:Name="EpisodeList"
 					  ItemsSource="{Binding Episodes}"
 					  ItemTemplate="{StaticResource EpisodeItemTemplate}"
-					  Header="{Binding Show.Result}"
+					  Header="{Binding ShowResult}"
 					  HeaderTemplate="{StaticResource ShowDetailsTemplate}"
 					  SelectionMode="Single"
 					  SelectedItem="{Binding SelectedEpisode, Mode=TwoWay}"

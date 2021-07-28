@@ -73,4 +73,5 @@
 	<converters:FromEmptyStringOrNullObjectToValueConverter x:Key="Material_EmptyOrNullToCollapsed"
 	                                                        NotEmptyOrNullValue="Visible"
 	                                                        EmptyOrNullValue="Collapsed" />
+	<converters:FromTaskStatusToVisibilityConverter x:Key="FromTaskStatusToVisibilityConverter" />
 </ResourceDictionary>

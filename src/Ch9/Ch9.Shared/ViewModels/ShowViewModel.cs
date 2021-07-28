@@ -59,10 +59,21 @@ namespace Ch9.ViewModels
         public Task<Show> Show
         {
             get => _show;
-            set => SetPropertyAndNotifyOnCompletion(ref _show, value);
+			set
+			{
+				SetPropertyAndNotifyOnCompletion(ref _show, value, task =>
+				{
+					OnPropertyChanged(nameof(ShowResult));
+				});
+			}
         }
 
-        private EpisodeViewModel[] _episodes;
+		public Show ShowResult =>
+((Task)_show)?.Status == TaskStatus.RanToCompletion
+? ((Task<Show>)_show).Result
+: null;
+
+		private EpisodeViewModel[] _episodes;
         public EpisodeViewModel[] Episodes
         {
             get => _episodes;

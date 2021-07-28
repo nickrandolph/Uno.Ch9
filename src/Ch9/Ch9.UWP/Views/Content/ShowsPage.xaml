@@ -68,10 +68,10 @@
 		</Grid>
 
 		<!-- Shows grid view -->
-		<GridView ItemsSource="{Binding Shows.Result}"
+		<GridView ItemsSource="{Binding ShowsResult}"
 				  Style="{StaticResource DefaultGridViewStyle}"
 				  HorizontalAlignment="Center"
-				  Visibility="{Binding Shows.IsSuccess, Converter={StaticResource TrueToVisible}, FallbackValue=Visible}"
+				  Visibility="{Binding Shows, Converter={StaticResource FromTaskStatusToVisibilityConverter},ConverterParameter=RanToCompletion,  FallbackValue=Collapsed}"
 				  Grid.Row="1">
 			<GridView.ItemTemplate>
 				<DataTemplate>
@@ -129,7 +129,7 @@
 		</Grid>
 
 		<!-- Loading list of shows -->
-		<Grid Visibility="{Binding Shows.IsExecuting, Converter={StaticResource TrueToVisible}, FallbackValue=Collapsed}"
+		<Grid Visibility="{Binding Shows.IsCompleted, Converter={StaticResource TrueToCollapsed}, FallbackValue=Collapsed}"
 			  Background="{ThemeResource AppBackgroundBrush}"
 			  HorizontalAlignment="Center"
 			  Grid.Row="1">
