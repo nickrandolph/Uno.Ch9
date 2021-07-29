@@ -184,7 +184,7 @@
 			  Grid.Column="0"
 			  Grid.ColumnSpan="2">
 			<ContentControl x:Name="ShowDetails"
-							Content="{Binding ShowResult}"
+							Content="{Binding Show, Converter={StaticResource TaskResultConverter}}"
 							ContentTemplate="{StaticResource ShowDetailsTemplate}"
 							HorizontalContentAlignment="Stretch"
 							Visibility="Collapsed" />
@@ -200,7 +200,7 @@
 			<ListView x:Name="EpisodeList"
 					  ItemsSource="{Binding Episodes}"
 					  ItemTemplate="{StaticResource EpisodeItemTemplate}"
-					  Header="{Binding ShowResult}"
+					  Header="{Binding Show, Converter={StaticResource TaskResultConverter}}"
 					  HeaderTemplate="{StaticResource ShowDetailsTemplate}"
 					  SelectionMode="Single"
 					  SelectedItem="{Binding SelectedEpisode, Mode=TwoWay}"

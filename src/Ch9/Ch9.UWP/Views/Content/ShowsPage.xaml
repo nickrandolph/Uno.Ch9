@@ -68,7 +68,7 @@
 		</Grid>
 
 		<!-- Shows grid view -->
-		<GridView ItemsSource="{Binding ShowsResult}"
+		<GridView ItemsSource="{Binding Shows, Converter={StaticResource TaskResultConverter}}"
 				  Style="{StaticResource DefaultGridViewStyle}"
 				  HorizontalAlignment="Center"
 				  Visibility="{Binding Shows, Converter={StaticResource FromTaskStatusToVisibilityConverter},ConverterParameter=RanToCompletion,  FallbackValue=Collapsed}"

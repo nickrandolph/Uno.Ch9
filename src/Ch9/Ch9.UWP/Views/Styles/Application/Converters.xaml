@@ -1,7 +1,8 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 					xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-					xmlns:converters="using:Ch9">
+					xmlns:converters="using:Ch9"
+					xmlns:converters1="using:Microsoft.Toolkit.Uwp.UI.Converters">
 
 	<x:Boolean x:Key="TrueValue">True</x:Boolean>
 	<x:Boolean x:Key="FalseValue">False</x:Boolean>
@@ -74,4 +75,5 @@
 	                                                        NotEmptyOrNullValue="Visible"
 	                                                        EmptyOrNullValue="Collapsed" />
 	<converters:FromTaskStatusToVisibilityConverter x:Key="FromTaskStatusToVisibilityConverter" />
+	<converters1:TaskResultConverter x:Key="TaskResultConverter" />
 </ResourceDictionary>

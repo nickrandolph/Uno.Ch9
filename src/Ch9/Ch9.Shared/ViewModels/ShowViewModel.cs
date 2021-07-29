@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Ch9.Domain;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Ch9.ViewModels
 {
@@ -61,17 +61,9 @@ namespace Ch9.ViewModels
             get => _show;
 			set
 			{
-				SetPropertyAndNotifyOnCompletion(ref _show, value, task =>
-				{
-					OnPropertyChanged(nameof(ShowResult));
-				});
+				SetPropertyAndNotifyOnCompletion(ref _show, value);
 			}
         }
-
-		public Show ShowResult =>
-((Task)_show)?.Status == TaskStatus.RanToCompletion
-? ((Task<Show>)_show).Result
-: null;
 
 		private EpisodeViewModel[] _episodes;
         public EpisodeViewModel[] Episodes

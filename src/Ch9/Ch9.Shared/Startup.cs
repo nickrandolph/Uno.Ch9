@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Net.Http;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ch9

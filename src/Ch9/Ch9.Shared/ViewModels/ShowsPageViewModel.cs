@@ -7,9 +7,9 @@ using System.Windows.Input;
 using Ch9.Domain;
 using Ch9.Views;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
 using Uno.Extensions.Navigation;
 using Uno.Extensions.Navigation.Messages;
 using static Ch9.Shell;
@@ -48,17 +48,9 @@ namespace Ch9.ViewModels
 			get => _shows;
 			set
 			{
-				SetPropertyAndNotifyOnCompletion(ref _shows, value, task =>
-				{
-					OnPropertyChanged(nameof(ShowsResult));
-				});
+				SetPropertyAndNotifyOnCompletion(ref _shows, value);
 			}
 		}
-
-		public IEnumerable<ShowItemViewModel> ShowsResult =>
-	((Task)_shows)?.Status == TaskStatus.RanToCompletion
-	? ((Task<IEnumerable<ShowItemViewModel>>)_shows).Result
-	: null;
 
 		public void LoadShowFeeds()
 		{

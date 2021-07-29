@@ -21,7 +21,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Ch9.ViewModels;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.DependencyInjection;
 #if !__MACOS__
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
@@ -497,7 +497,8 @@ namespace Ch9
 				message = message with { Args = new Dictionary<string, object> { { TabTypeRouteParameter, TabType.Shows } } };
 			}
 
-			if(message.Args.TryGetValue(TabTypeRouteParameter,out var tabTypeArg))
+			if(message.Args is not null &&
+				message.Args.TryGetValue(TabTypeRouteParameter,out var tabTypeArg))
 			{
 				var tabType = (TabType)tabTypeArg;
 

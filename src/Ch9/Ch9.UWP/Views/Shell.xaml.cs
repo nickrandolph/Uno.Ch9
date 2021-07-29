@@ -6,6 +6,9 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Ch9.ViewModels;
 using Ch9.Views;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using Uno.Extensions.Navigation;
+using Uno.Extensions.Navigation.Messages;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Core;
@@ -228,7 +231,7 @@ namespace Ch9
 				ActiveTabChanged?.Invoke(this, EventArgs.Empty);
 			}
 
-			UpdateBackButtonVisibility();
+			//UpdateBackButtonVisibility();
 #if !DEBUG
 			AnalyticsService.TrackView(targetPageType.Name);
 #endif
@@ -271,11 +274,13 @@ namespace Ch9
 
 			if (_activeFrame?.CanGoBack ?? false)
 			{
-				GoBackAndClearDataContext(_activeFrame);
+				var messenger = Ioc.Default.GetService<IRouteMessenger>();
+				messenger.Send(new CloseMessage());
+				//GoBackAndClearDataContext(_activeFrame);
 
-				UpdateBackButtonVisibility();
+				////UpdateBackButtonVisibility();
 
-				Navigated?.Invoke(this, _activeFrame);
+				//Navigated?.Invoke(this, _activeFrame);
 
 				return true;
 			}
@@ -341,6 +346,7 @@ namespace Ch9
 			if (!_frames.TryGetValue(tabType, out var frame))
 			{
 				frame = new Frame();
+				frame.Navigated += Frame_Navigated;
 				this.RootContent.Children.Add(frame);
 				_frames.Add(tabType, frame);
 			}
@@ -360,6 +366,11 @@ namespace Ch9
 				ActiveTabChanged?.Invoke(this, EventArgs.Empty);
 			}
 
+		}
+
+		private void Frame_Navigated(object sender, NavigationEventArgs e)
+		{
+			UpdateBackButtonVisibility();
 		}
 	}
 }
