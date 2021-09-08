@@ -69,23 +69,16 @@ namespace Ch9
 			Instance = this;
 
 			Host = UnoHost
-#if __WASM__
-                .CreateDefaultBuilderForWASM()
-#else
 			   .CreateDefaultBuilder()
-#endif
+			   .UsePlatformLoggerProvider()
 			   //.UseConfigurationSectionInApp<CustomIntroduction>(nameof(CustomIntroduction))
-			   .UseUnoLogging(logBuilder =>
+			   .ConfigureLogging(logBuilder =>
 			   {
 				   logBuilder
 						.SetMinimumLevel(LogLevel.Debug)
 						.XamlLogLevel(LogLevel.Information)
 						.XamlLayoutLogLevel(LogLevel.Information);
-			   }
-#if __WASM__
-                    , new global::Uno.Extensions.Logging.WebAssembly.WebAssemblyConsoleLoggerProvider()
-#endif
-			   )
+			   })
 			   //.UseSerilog(true)
 			   //.UseLocalization()
 			   .UseRouting<RouterConfiguration, LaunchMessage>(() => _shell.ActiveFrame)
@@ -95,23 +88,25 @@ namespace Ch9
 					.AddSingleton<ITabManager>(sp => _shell)
 					.AddSingleton<IRouter, TabRouter>(); // Override the default Router
 			   }) 
-			   .AddConfigurationSectionFromEntity(new EndpointOptions()
-			   {
-				   Url = "https://ch9-app.azurewebsites.net/",
-				   Features = new Dictionary<string, bool>
-				   {
-					   { nameof(EndpointOptions.UseNativeHandler), true }
-				   }
-			   }, typeof(IShowService).Name)
+			   //.AddConfigurationSectionFromEntity(new EndpointOptions()
+			   //{
+				  // Url = "https://ch9-app.azurewebsites.net/",
+				  // Features = new Dictionary<string, bool>
+				  // {
+					 //  { nameof(EndpointOptions.UseNativeHandler), true }
+				  // }
+			   //}, typeof(IShowService).Name)
 			   .ConfigureServices((context, services) =>
 			   {
 				   _ = services
-				   .AddNativeHandler(
-#if __WASM__
-				() => new Uno.UI.Wasm.WasmHttpHandler()
-#endif
-				)
-				   .AddClient<IShowService, ShowService>(context, typeof(IShowService).Name);
+				   .AddNativeHandler()
+				   .AddClient<IShowService, ShowService>(context,
+						   new EndpointOptions
+							   {
+								   Url = "https://ch9-app.azurewebsites.net/"
+							   }
+							   .Enable(nameof(EndpointOptions.UseNativeHandler)
+					   ));
 			   })
 			   .Build()
 			   .EnableUnoLogging();
